@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Meta viewport para móviles (sin zoom molesto) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Kora Home - Carrito Funcional</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Playfair Display', serif;
+      background-color: #fffdfb;
+      margin: 0;
+      padding: 0;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    header {
+      background-color: #f7d7d0;
+      color: #5e3d3b;
+      padding: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      margin: 0;
+    }
+    .menu-btn, .cart-btn {
+      background: none;
+      border: none;
+      color: #5e3d3b;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .cart-btn {
+      position: relative;
+      font-size: 1.8rem;
+    }
+    .cart-count {
+      position: absolute;
+      top: -6px;
+      right: -10px;
+      background: red;
+      color: white;
+      border-radius: 50%;
+      padding: 2px 7px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    .menu {
+      display: none;
+      flex-direction: column;
+      background: white;
+      position: absolute;
+      top: 60px;
+      left: 10px;
+      border: 1px solid #ccc;
+      z-index: 10;
+    }
+    .menu a {
+      padding: 1rem;
+      text-decoration: none;
+      color: #5e3d3b;
+      border-bottom: 1px solid #eee;
+    }
+    .menu a:hover {
+      background-color: #f9e4df;
+    }
+    .carousel {
+      background-color: #fceae7;
+      text-align: center;
+      padding: 1rem;
+      font-weight: bold;
+      color: #5e3d3b;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 1rem;
+      padding-top: 2rem;
+    }
+    .grid-productos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+    .producto {
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .producto h3 {
+      color: #704d4a;
+    }
+    .producto p {
+      color: #4d4d4d;
+    }
+    .cantidad-control {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0.5rem 0;
+      gap: 0.5rem;
+    }
+    .cantidad-control button {
+      background-color: #e8b3a7;
+      color: white;
+      border: none;
+      padding: 0.3rem 0.7rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .boton-agregar {
+      background-color: #cfa6a0;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    
+    /* MODIFICACIONES PARA EL CARRITO */
+    .carrito {
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 300px;
+      height: 100vh;
+      background: #f9f5f3;
+      color: #5e3d3b;
+      padding: 1rem;
+      box-shadow: -3px 0 6px rgba(0,0,0,0.1);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      z-index: 9999;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .carrito.abierto {
+      transform: translateX(0);
+    }
+    .carrito h2 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cerrar-carrito-btn {
+      background: none;
+      border: none;
+      color: #5e3d3b;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+    }
+    .carrito-item {
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #dcdcdc;
+      padding-bottom: 0.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .carrito-item strong {
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+    }
+    .carrito-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+    }
+    .carrito-item-controls button {
+      background: #e8b3a7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      padding: 0 8px;
+      font-size: 1rem;
+      user-select: none;
+      transition: background 0.2s ease;
+    }
+    .carrito-item-controls button:hover {
+      background: #cfa6a0;
+    }
+    .carrito-item-subtotal {
+      margin-top: 0.5rem;
+      font-weight: bold;
+    }
+    #carrito-total {
+      margin-top: auto;
+      font-weight: bold;
+      font-size: 1.3rem;
+      padding-top: 1rem;
+      border-top: 1px solid #dcdcdc;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .menu {
+        position: static;
+        width: 100%;
+        border: none;
+      }
+      .carrito {
+        width: 100%;
+        height: 50vh;
+        bottom: 0;
+        top: auto;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+      }
+      .carrito.abierto {
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <h1>Kora Home</h1>
+    <button class="cart-btn" onclick="toggleCarrito()" aria-label="Carrito">
+      🛒 <span class="cart-count" id="cart-count">0</span>
+    </button>
+    <nav class="menu" id="menu">
+      <a href="#productos" onclick="closeMenu()">Productos</a>
+      <a href="#" onclick="closeMenu()">Nosotros</a>
+      <a href="#" onclick="closeMenu()">Ayuda</a>
+    </nav>
+  </header>
+
+  <div class="carousel">
+    "Haz de tu hogar un espacio cálido, con estilo y accesible."
+  </div>
+
+  <main class="container">
+    <div class="grid-productos" id="productos"></div>
+  </main>
+
+  <aside class="carrito" id="carrito">
+    <h2>Tu carrito <button class="cerrar-carrito-btn" onclick="toggleCarrito()">×</button></h2>
+    <div id="carrito-items"></div>
+    <div id="carrito-total">Total: ₡0</div>
+  </aside>
+
+  <script>
+    const productos = [
+      { nombre: "Almohada de Bambú", descripcion: "Ergonómica y fresca.", precio: 4000 },
+      { nombre: "Cobija térmica", descripcion: "Textura suave y cálida.", precio: 6500 },
+      { nombre: "Vela aromática", descripcion: "Relajante aroma a vainilla.", precio: 2000 },
+      { nombre: "Set de organizadores", descripcion: "Orden con estilo.", precio: 5500 },
+      { nombre: "Espejo decorativo", descripcion: "Ideal para sala o baño.", precio: 3000 },
+      { nombre: "Maceta artesanal", descripcion: "Cerámica pintada a mano.", precio: 2500 },
+      { nombre: "Difusor de aromas", descripcion: "Ambiente fresco todo el día.", precio: 4500 },
+      { nombre: "Cojín boho", descripcion: "Decoración cómoda y chic.", precio: 3700 },
+      { nombre: "Toalla de algodón", descripcion: "100% suave y absorbente.", precio: 3200 },
+      { nombre: "Tapete antideslizante", descripcion: "Ideal para cocina o baño.", precio: 2800 },
+      { nombre: "Cesto de mimbre", descripcion: "Multiuso para el hogar.", precio: 4200 },
+      { nombre: "Portavelas dorado", descripcion: "Elegancia en cada rincón.", precio: 2900 },
+      { nombre: "Caja organizadora", descripcion: "Práctica y elegante.", precio: 3300 },
+      { nombre: "Lámpara LED", descripcion: "Luz cálida para tu espacio.", precio: 6100 },
+      { nombre: "Cortina decorativa", descripcion: "Textura ligera y fresca.", precio: 4800 },
+      { nombre: "Portarretrato vintage", descripcion: "Recuerdos con estilo.", precio: 2300 },
+      { nombre: "Jabones artesanales", descripcion: "Aromas naturales únicos.", precio: 1800 },
+      { nombre: "Bandeja de madera", descripcion: "Desayunos con encanto.", precio: 3900 },
+      { nombre: "Reloj de pared", descripcion: "Diseño moderno y funcional.", precio: 5300 },
+      { nombre: "Difusor ultrasónico", descripcion: "Aromaterapia diaria.", precio: 6900 }
+    ];
+
+    const carrito = {};
+    const contenedorProductos = document.getElementById('productos');
+    const carritoItems = document.getElementById('carrito-items');
+    const carritoTotal = document.getElementById('carrito-total');
+    const cartCount = document.getElementById('cart-count');
+    const carritoDiv = document.getElementById('carrito');
+    const menu = document.getElementById('menu');
+
+    // Crear productos al cargar la página
+    document.addEventListener('DOMContentLoaded', () => {
+      productos.forEach((producto, index) => {
+        const div = document.createElement('div');
+        div.className = 'producto';
+        div.innerHTML = `
+          <h3>${producto.nombre}</h3>
+          <p>${producto.descripcion}</p>
+          <p><strong>₡${producto.precio.toLocaleString()}</strong></p>
+          <div class="cantidad-control">
+            <button onclick="modificarCantidad(this, -1)">-</button>
+            <span class="cantidad">1</span>
+            <button onclick="modificarCantidad(this, 1)">+</button>
+          </div>
+          <button class="boton-agregar" onclick="agregarAlCarrito(${index}, this)">Agregar</button>
+        `;
+        contenedorProductos.appendChild(div);
+      });
+    });
+
+    // Modificar cantidad producto antes de agregar
+    function modificarCantidad(btn, delta) {
+      const spanCantidad = btn.parentElement.querySelector('.cantidad');
+      let cantidad = parseInt(spanCantidad.textContent);
+      cantidad = Math.min(9, Math.max(1, cantidad + delta));
+      spanCantidad.textContent = cantidad;
+    }
+
+    // Agregar producto al carrito
+    function agregarAlCarrito(index, btn) {
+      const spanCantidad = btn.previousElementSibling.querySelector('.cantidad');
+      const cantidad = parseInt(spanCantidad.textContent);
+      const producto = productos[index];
+
+      if (carrito[producto.nombre]) {
+        carrito[producto.nombre].cantidad += cantidad;
+        if (carrito[producto.nombre].cantidad > 99) carrito[producto.nombre].cantidad = 99;
+      } else {
+        carrito[producto.nombre] = {...producto, cantidad};
+      }
+      actualizarCarrito();
+      abrirCarrito();
+    }
+
+    // Mostrar / ocultar carrito
+    function toggleCarrito() {
+      carritoDiv.classList.toggle('abierto');
+    }
+    function abrirCarrito() {
+      carritoDiv.classList.add('abierto');
+    }
+    function cerrarCarrito() {
+      carritoDiv.classList.remove('abierto');
+    }
+
+    // Modificar cantidad dentro del carrito
+    function modificarCantidadCarrito(nombre, delta) {
+      if (!carrito[nombre]) return;
+      carrito[nombre].cantidad += delta;
+      if (carrito[nombre].cantidad <= 0) {
+        delete carrito[nombre];
+      }
+      actualizarCarrito();
+    }
+
+    // Eliminar producto del carrito
+    function eliminarProducto(nombre) {
+      if (carrito[nombre]) {
+        delete carrito[nombre];
+        actualizarCarrito();
+      }
+    }
+
+    // Actualizar vista carrito y contador
+    function actualizarCarrito() {
+      carritoItems.innerHTML = '';
+      let total = 0;
+      let cantidadTotal = 0;
+
+      for (const nombre in carrito) {
+        const item = carrito[nombre];
+        const subtotal = item.precio * item.cantidad;
+        total += subtotal;
+        cantidadTotal += item.cantidad;
+
+        carritoItems.innerHTML += `
+          <div class="carrito-item">
+            <strong>${item.nombre}</strong>
+            <div class="carrito-item-controls">
+              <button onclick="modificarCantidadCarrito('${nombre}', -1)">-</button>
+              <span>${item.cantidad}</span>
+              <button onclick="modificarCantidadCarrito('${nombre}', 1)">+</button>
+              <button onclick="eliminarProducto('${nombre}')" title="Eliminar producto">🗑</button>
+            </div>
+            <div class="carrito-item-subtotal">Subtotal: ₡${subtotal.toLocaleString()}</div>
+          </div>
+        `;
+      }
+
+      carritoTotal.textContent = `Total: ₡${total.toLocaleString()}`;
+      cartCount.textContent = cantidadTotal;
+    }
+
+    // Menú responsive toggle
+    function toggleMenu() {
+      if (menu.style.display === 'flex') {
+        menu.style.display = 'none';
+      } else {
+        menu.style.display = 'flex';
+      }
+    }
+
+    // Cerrar menú al hacer clic en un enlace
+    function closeMenu() {
+      menu.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
